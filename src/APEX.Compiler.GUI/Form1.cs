@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -18,13 +18,64 @@ namespace APEX.Compiler.GUI
         {
             InitializeComponent();
 
-            UpdateStatus("Ready", Color.FromArgb(0, 255, 0));
+            UpdateStatus("Ready", Color.FromArgb(88, 214, 154));
 
             // Load previously saved paths.
             txtSource.Text = Properties.Settings.Default.SourcePath;
             txtOutput.Text = Properties.Settings.Default.OutputPath;
+            RefreshCompilerDisplay();
+
+            // The fields shorten visually when the window narrows. Hover to see the full path.
+            pathToolTip.AutoPopDelay = 18000;
+            pathToolTip.InitialDelay = 350;
+            pathToolTip.ReshowDelay = 100;
+            pathToolTip.ShowAlways = true;
+            txtCompiler.TextChanged += (sender, args) =>
+                pathToolTip.SetToolTip(txtCompiler, txtCompiler.Text);
+            txtSource.TextChanged += (sender, args) =>
+                pathToolTip.SetToolTip(txtSource, txtSource.Text);
+            txtOutput.TextChanged += (sender, args) =>
+                pathToolTip.SetToolTip(txtOutput, txtOutput.Text);
+            UpdatePathTooltips();
 
             this.FormClosing += MainForm_FormClosing;
+        }
+
+        // Use the saved compiler path, or find the CLI beside the GUI in bundle releases.
+        private string ResolveCompilerPath()
+        {
+            string configuredPath = Properties.Settings.Default.CompilerPath;
+            if (!string.IsNullOrWhiteSpace(configuredPath) && File.Exists(configuredPath))
+                return configuredPath;
+
+            string siblingPath = Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory, "APEX.Compiler.exe");
+            if (File.Exists(siblingPath))
+                return siblingPath;
+
+            return configuredPath ?? string.Empty;
+        }
+
+        private void RefreshCompilerDisplay()
+        {
+            string compilerPath = ResolveCompilerPath();
+            bool found = !string.IsNullOrWhiteSpace(compilerPath) && File.Exists(compilerPath);
+
+            txtCompiler.Text = compilerPath;
+            lblCompilerBadge.Text = found ? "COMPILER FOUND" : "SELECT COMPILER";
+            lblCompilerBadge.ForeColor = found
+                ? Color.FromArgb(88, 214, 154)
+                : Color.FromArgb(226, 179, 98);
+            lblCompilerBadge.BackColor = found
+                ? Color.FromArgb(24, 60, 54)
+                : Color.FromArgb(59, 53, 38);
+        }
+
+        private void UpdatePathTooltips()
+        {
+            pathToolTip.SetToolTip(txtCompiler, txtCompiler.Text);
+            pathToolTip.SetToolTip(txtSource, txtSource.Text);
+            pathToolTip.SetToolTip(txtOutput, txtOutput.Text);
         }
 
         private void btnBrowseSource_Click(object sender, EventArgs e)
@@ -58,15 +109,8 @@ namespace APEX.Compiler.GUI
 
         private async void btnCompile_Click(object sender, EventArgs e)
         {
-            // Prefer the compiler chosen in Settings; also support a portable sibling executable.
-            string compilerPath = Properties.Settings.Default.CompilerPath;
-            if (string.IsNullOrWhiteSpace(compilerPath) || !File.Exists(compilerPath))
-            {
-                string bundledCompiler = Path.Combine(
-                    AppDomain.CurrentDomain.BaseDirectory, "APEX.Compiler.exe");
-                if (File.Exists(bundledCompiler))
-                    compilerPath = bundledCompiler;
-            }
+            // Prefer a configured compiler, with portable sibling-EXE detection.
+            string compilerPath = ResolveCompilerPath();
 
             string sourcePath = txtSource.Text.Trim();
             string outputPath = txtOutput.Text.Trim();
@@ -103,6 +147,7 @@ namespace APEX.Compiler.GUI
             btnCompile.Enabled = false;
             UpdateStatus("Compiling...", Color.FromArgb(0, 191, 255));
             rtbLog.Clear();
+            Stopwatch buildTimer = Stopwatch.StartNew();
 
             try
             {
@@ -152,8 +197,14 @@ namespace APEX.Compiler.GUI
                             File.Move(tempOutputPath, outputPath);
                         }
 
-                        UpdateStatus("Build successful", Color.FromArgb(88, 214, 154));
+                        buildTimer.Stop();
+                        long outputBytes = new FileInfo(outputPath).Length;
+                        string elapsed = buildTimer.Elapsed.TotalSeconds.ToString("0.00") + "s";
 
+                        UpdateStatus("Build successful · " + elapsed, Color.FromArgb(88, 214, 154));
+                        AppendLog("Final output: " + outputPath, Color.FromArgb(86, 216, 255));
+                        AppendLog("Output size: " + outputBytes.ToString("N0") + " bytes");
+                        AppendLog("Total build time: " + elapsed);
                         AppendLog(
                             "GSCC compiled and verified successfully.",
                             Color.FromArgb(0, 255, 0)
@@ -161,7 +212,9 @@ namespace APEX.Compiler.GUI
                     }
                     else
                     {
-                        UpdateStatus("Build failed", Color.FromArgb(240, 91, 91));
+                        buildTimer.Stop();
+                        string elapsed = buildTimer.Elapsed.TotalSeconds.ToString("0.00") + "s";
+                        UpdateStatus("Build failed · " + elapsed, Color.FromArgb(240, 91, 91));
 
                         AppendLog(
                             "Compilation failed. Previous GSCC preserved.",
@@ -172,12 +225,15 @@ namespace APEX.Compiler.GUI
             }
             catch (Exception ex)
             {
-                UpdateStatus("Build error", Color.FromArgb(240, 91, 91));
+                buildTimer.Stop();
+                UpdateStatus("Build error · " + buildTimer.Elapsed.TotalSeconds.ToString("0.00") + "s",
+                    Color.FromArgb(240, 91, 91));
                 AppendLog("ERROR: " + ex.Message, Color.FromArgb(240, 91, 91));
             }
 
             finally
             {
+                buildTimer.Stop();
                 if (File.Exists(tempOutputPath))
                 {
                     try
@@ -261,7 +317,8 @@ namespace APEX.Compiler.GUI
                     Properties.Settings.Default.CompilerPath = dialog.FileName;
                     Properties.Settings.Default.Save();
 
-                    AppendLog("Compiler selected: " + dialog.FileName);
+                    RefreshCompilerDisplay();
+                    AppendLog("\nCompiler selected: " + dialog.FileName);
                 }
             }
         }
