@@ -4,70 +4,104 @@
 
 APEX DevTools provides a streamlined way to compile `.gsc` source files into `.gscc` files for Call of Duty: Black Ops III on PlayStation 4.
 
-![APEX Compiler GUI](assets/apex-compiler-gui.png)
+Designed for **PS4 BO3 version 1.33**, built using **C# and .NET Framework 4.8**.
 
-Built using C# and .NET Framework 4.8.
+![APEX Compiler GUI](assets/apex-compiler-gui.png?v=2)
 
-## Features
+## Download
 
-### APEX Compiler (CLI)
-- GSC to GSCC compilation
-- PS4 BO3 1.33 opcode support
-- Command-line operation
-- Suitable for scripting and automated build workflows
-
-### APEX Compiler GUI
-- Custom dark-themed Windows Forms interface
-- Source directory and output file selection
-- One-click GSCC compilation
-- Coloured compilation logs
-- Real-time compilation status indicators
-- Persistent source and output paths
-- Configurable compiler executable location
-- Open compiled output directly in File Explorer
-
-The compiler and GUI are maintained in one Visual Studio solution but can be used independently.
-
----
-
-## Downloads
-
-Download the latest version from [GitHub Releases](../../releases/latest).
+**[Download the latest release](https://github.com/CozyMeds/APEX-BO3-Compiler/releases/latest)**
 
 | Package | Description |
 |---|---|
-| APEX Compiler CLI | Command-line compiler only |
-| APEX Compiler GUI | Graphical interface; requires the CLI separately |
-| APEX Compiler Bundle | GUI and CLI together — recommended |
+| **APEX Compiler Bundle** | GUI and compiler together — recommended |
+| APEX Compiler GUI | Standalone graphical interface; requires the CLI separately |
+| APEX Compiler CLI | Command-line compiler for advanced users |
+
+No Visual Studio installation is required to use the precompiled releases.
 
 ### System requirements
 
 - Windows
-- .NET Framework 4.8
+- .NET Framework 4.8 runtime
 - Compatible PS4 BO3 1.33 environment for testing compiled scripts
+
+---
+
+## Features
+
+### APEX Compiler — CLI
+
+- GSC to GSCC compilation
+- PS4 BO3 1.33 opcode support
+- Standalone command-line operation
+- Suitable for scripting and automated build workflows
+
+### APEX Compiler — GUI
+
+- Redesigned dark-themed Windows Forms interface
+- Clean, resizable layout with organised build configuration
+- Automatic compiler detection when bundled
+- Configurable compiler executable location
+- Source directory and output file selection
+- One-click GSCC compilation
+- Coloured, automatically scrolling build console
+- Real-time compilation status and compiler detection indicators
+- Compilation duration tracking
+- Final output path and file size reporting
+- Output verification before replacing existing GSCC files
+- Full-path tooltips for file and directory selections
+- Persistent compiler, source and output paths
+- Open compiled output directly in File Explorer
+
+Both applications are maintained in one Visual Studio solution but can be built and used independently.
+
+---
+
+## What's New in v1.1.0
+
+This release introduces a redesigned graphical interface and improved compilation feedback.
+
+**Interface improvements**
+- Reorganised compiler, source and output configuration
+- Improved window resizing and minimum dimensions
+- Updated action buttons and build console layout
+- Simplified status footer
+- Added full-path tooltips
+
+**Compilation improvements**
+- Total build duration reporting
+- Final output filename and size displayed in the build log
+- Improved success and error feedback
+- Existing GSCC output preserved when compilation fails
+
+---
 
 ## Installation
 
-### Recommended — Bundle
+### Recommended — APEX Compiler Bundle
 
-1. Download `APEX-Compiler-Bundle-v1.0.0.zip`.
-2. Extract the ZIP to a folder of your choice.
-3. Launch `APEX.Compiler.GUI.exe`.
-4. Select your GSC source directory.
-5. Select your desired GSCC output location.
-6. Click **COMPILE GSCC**.
+1. Open the [latest GitHub release](https://github.com/CozyMeds/APEX-BO3-Compiler/releases/latest).
+2. Download the `APEX-Compiler-Bundle` ZIP.
+3. Extract it to a folder of your choice.
+4. Launch `APEX.Compiler.GUI.exe`.
+5. Select your GSC source directory.
+6. Choose your GSCC output destination.
+7. Click **COMPILE GSCC**.
 
-The GUI automatically detects the compiler when both executables are in the same directory, unless a valid custom compiler path is configured.
+The GUI automatically detects `APEX.Compiler.exe` when both executables are in the same directory, unless a valid custom compiler path is already configured.
 
-### GUI only
+### GUI Only
 
-Download and extract `APEX-Compiler-GUI-v1.0.0.zip`.
+Download the `APEX-Compiler-GUI` ZIP from the latest release.
 
-Launch the GUI, click **SELECT COMPILER**, and select an existing compatible `APEX.Compiler.exe`.
+Extract and launch `APEX.Compiler.GUI.exe`.
 
-### Command-line usage
+Use the **Browse** button beside **Compiler Executable** to select your existing compatible `APEX.Compiler.exe`.
 
-Download and extract `APEX-Compiler-CLI-v1.0.0.zip`.
+### Command-Line Usage
+
+Download the `APEX-Compiler-CLI` ZIP.
 
 Open PowerShell in the compiler directory and execute:
 
@@ -75,58 +109,66 @@ Open PowerShell in the compiler directory and execute:
 .\APEX.Compiler.exe "C:\Path\To\GSC-Source" "C:\Path\To\APEX.gscc"
 ```
 
-Keep `Irony.dll` and `apex_ps4_ops.bin` alongside the compiler executable.
+The compiler requires `Irony.dll` and `apex_ps4_ops.bin` in the same directory as its executable.
 
 ---
 
-## Building from source
+## Building from Source
 
 1. Clone or download this repository.
 2. Open `APEX.DevTools.sln` in Visual Studio Community.
-3. Ensure the .NET Framework 4.8 targeting pack is installed.
-4. Restore NuGet packages when prompted.
+3. Install the .NET Framework 4.8 developer targeting pack if required.
+4. Restore NuGet dependencies.
 5. Select **Release | Any CPU**.
 6. Select **Build → Build Solution**.
 
-The solution contains two independent projects:
+### Repository Structure
 
 ```text
-APEX.DevTools.sln
+APEX-BO3-Compiler/
+├── APEX.DevTools.sln
 ├── src/
 │   ├── APEX.Compiler/
 │   └── APEX.Compiler.GUI/
 ├── samples/
 ├── scripts/
 │   └── package.ps1
+├── assets/
+│   └── apex-compiler-gui.png
 ├── README.md
 └── CREDITS_AND_RIGHTS.md
 ```
 
-## Packaging releases
+## Packaging Releases
 
-After successfully building both projects, open PowerShell in the repository root.
+After building both projects in Release mode, open PowerShell in the repository root.
+
+For example, to package v1.1.0:
 
 ```powershell
-.\scripts\package.ps1 -Version "1.0.0"
+.\scripts\package.ps1 -Version "1.1.0"
 ```
 
-This generates three distribution archives inside `artifacts/`:
+The script creates three downloadable archives in `artifacts/`:
 
 ```text
-APEX-Compiler-CLI-v1.0.0.zip
-APEX-Compiler-GUI-v1.0.0.zip
-APEX-Compiler-Bundle-v1.0.0.zip
+APEX-Compiler-CLI-v1.1.0.zip
+APEX-Compiler-GUI-v1.1.0.zip
+APEX-Compiler-Bundle-v1.1.0.zip
 ```
 
-Each package can be distributed separately.
+Each archive can be distributed independently.
 
-## Compatibility and limitations
+---
 
-- Designed for PS4 BO3 version 1.33.
-- Compilation does not guarantee successful execution in-game.
-- No PS4 injector or console payload is included.
+## Compatibility and Limitations
+
+- Designed for PS4 Black Ops III version 1.33.
 - Other game versions have not been validated.
-- The combined solution and distribution packages have been tested by the developer on Windows.
+- Compilation does not guarantee successful execution in-game.
+- No PS4 injector or console payloads are included.
+- The application requires Windows and .NET Framework 4.8.
+- Release packages should be tested after each update.
 
 ## Credits
 
