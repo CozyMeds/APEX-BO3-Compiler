@@ -1,0 +1,17 @@
+# Visual Studio, MSBuild and local state
+.vs/
+**/bin/
+**/obj/
+*.user
+*.suo
+*.rsuser
+*.userosscache
+*.sln.docstates
+# Local executable/script outputs
+*.gscc
+*.pdb
+# Build release files
+artifacts/
+# Local machine settings and operating-system clutter
+.DS_Store
+Thumbs.db

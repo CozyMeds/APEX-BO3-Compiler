@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net48</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <AssemblyName>APEX.Compiler</AssemblyName>
+    <RootNamespace>ApexCompiler</RootNamespace>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Irony" Version="1.1.0" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <None Update="apex_ps4_ops.bin" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>
